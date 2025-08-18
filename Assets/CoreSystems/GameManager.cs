@@ -14,22 +14,22 @@ public class GameManager : Singleton<GameManager>
 
     public GameState CurrentState { get; private set; }
     [SerializeField] private GameState _initialState;
-    [SerializeField] private GameObject _deathScreen;
+    // [SerializeField] private GameObject _deathScreen;
 
     public override void Awake()
     {
         base.Awake();
 
         SetState(_initialState);
-        _deathScreen.SetActive(false);
+        // _deathScreen.SetActive(false);
     }
 
     public void SetState(GameState state)
     {
         // Make cursor usable only if in menu state
-        bool isMenu = state == GameState.Menu || state == GameState.Dead;
-        Cursor.visible = isMenu;
-        Cursor.lockState = isMenu ? CursorLockMode.None : CursorLockMode.Locked;
+        // bool isMenu = state == GameState.Menu || state == GameState.Dead;
+        // Cursor.visible = isMenu;
+        // Cursor.lockState = isMenu ? CursorLockMode.None : CursorLockMode.Locked;
 
         Instance.CurrentState = state;
     }
@@ -45,7 +45,7 @@ public class GameManager : Singleton<GameManager>
 
         FadeManager.Instance.CloseEyesAndDo(() =>
         {
-            _deathScreen.SetActive(true);
+            // _deathScreen.SetActive(true);
         });
     }
 }

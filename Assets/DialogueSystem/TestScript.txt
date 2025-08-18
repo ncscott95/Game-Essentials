@@ -1,0 +1,206 @@
+#INTRO
+
+NARRATION
+The clock ticks away.
+
+NARRATION
+Another day has passed.
+
+NARRATION
+You’re one of millions living in a dense metropolis, teeming with others like you who are doing whatever they can to get by in this capitalistic hell.
+
+NARRATION
+The only home you’ve ever known.
+
+NARRATION
+And the only life you’ve ever known—that of those at the bottom of the city’s hierarchy.
+
+NARRATION
+You struggle to get by, doing whatever you can to make it another day.
+
+NARRATION
+The difficulties experienced by the impoverished go ignored by those above it, turning their gazes away to instead look upon their lavish lives.
+
+NARRATION
+Food insecurity, inability to afford housing, all atop a recent increase in monster appearances.
+
+NARRATION
+Terrifying creatures that most had only heard stories of, their presence brings ruin to those unfortunate to be within the range of their destruction.
+
+NARRATION
+All unseen by those at the top.
+
+NARRATION
+Whilst searching for a way to earn enough to pay this month’s rent, a job listing catches your eye.
+
+NARRATION
+“---- company. For our future.”
+
+NARRATION
+A position offering lucrative pay with no skill requirements, only asking for decent physical health.
+
+NARRATION
+Super sketchy. Way too good to be true.
+
+NARRATION
+...but when you’re not sure if you’ll survive ‘til the end of the week, you’ve gotta take anything you can get.
+(test_sfx)
+
+???
+Welcome to your first day at ------!
+
+???
+I’m Ven, director of the research department—and your new manager.
+
+
+
+#OFFICE
+
+NARRATION
+Your new manager stands before you, donning a friendly smile.
+
+NARRATION
+His warm personality and cheerful expression give the impression of someone easy to approach.
+
+NARRATION
+Yet he has an undoubtable air of reliability, as his confidence leaves no room to question his position as your superior.
+
+VEN
+As you know, the recent increase in monster appearances has been a major cause for concern.
+
+VEN
+Monsters bringing destruction to heavily populated areas are kinda hard to ignore after all.
+
+VEN
+Considering the circumstances, our company has been redirecting more resources into monster research.
+
+VEN
+Which is great, since my team’s expanding and I get to meet lots of promising people like you!
+
+VEN
+I wasn’t expecting the sheer number of onboardings I’ve been leading as of late, but I definitely don’t mind getting to know my new subordinates a bit before working together.
+
+NARRATION
+His eyes hold a warmth that’s not often found within the harsh environment of the city.
+
+NARRATION
+It’s kind, yet unfamiliar.
+
+VEN
+On that note, I’ll leave you to settle in at your desk for now. You deserve a break from my chattering.
+
+VEN
+I still have more to show you though, so come find me when you’re ready to move on.
+
+
+
+#INTERACT_MAT
+
+COWORKER
+Oh, hey!
+
+COWORKER
+You’re the new guy, right?
+
+COWORKER
+I’m Mat. Nice to meet you!
+
+MAT
+Feel free to let me know if you’ve got any questions when Ven’s not around.
+
+MAT
+I’m not a manager like he is, but I’ve been here a while so I can help out if he’s not available.
+
+
+
+
+#INTERACT_READY
+
+VEN
+I see you’re ready to move on. Follow me.
+
+
+
+#LAB
+
+VEN
+This is our laboratory. We have numerous containment units hosting monsters that we’ve captured.
+
+VEN
+No need to worry about a rogue monster rampaging through the halls. These walls are sturdy, so we’ve never experienced a containment breach.
+
+VEN
+—not yet at least, haha.
+
+VEN
+Everyday you’ll be collecting data from the unit you’re assigned to. Since it’s your first day, you’ll be handling a weaker monster today.
+
+VEN
+And just so you know, some of our employees experience strange phenomena when engaging with the monsters.
+
+VEN
+If anything weird starts happening, stay calm. I can’t guarantee that I’ll know how to help with the symptoms, but I’ll lend an ear if you’d like to talk about it.
+
+VEN
+I think you’re ready to get to work. I’m sure you’ll do well, so go ahead and enter the unit.
+
+
+
+#REPORT
+
+VEN
+Good job! You did well for your first day on the job.
+
+VEN
+You’ve got potential in this company.
+
+VEN
+Your quick thinking and capabilities are just what we’re looking for.
+
+VEN
+Ahem, back to onboarding.
+
+VEN
+At the end of each day you’ll report your findings back to me.
+
+VEN
+The data you’ve collected will be collected and sent for analysis.
+
+VEN
+I’m sure you'll be tired at the end of each day though, so you can fill out the paperwork the day after.
+
+VEN
+As long as all the raw data is reported back to me, I’ll make sure that it’s all recorded before leaving.
+
+VEN
+You’ve done great today. Head home and get some rest.
+
+
+
+#LOCKED_2
+
+NARRATION
+Locked.
+
+NARRATION
+You can faintly hear heavy thumping and the bubbling of chemicals from inside.
+
+
+
+#LOCKED_3
+
+NARRATION
+Locked.
+
+NARRATION
+You can faintly hear something scratching and scurrying on the walls inside.
+
+
+
+#LOCKED_4
+
+NARRATION
+The doors are locked tightly.
+
+NARRATION
+You can hear only silence from within.
