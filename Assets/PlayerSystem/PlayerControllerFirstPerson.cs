@@ -1,38 +1,9 @@
 using System.Collections;
-using System.Collections.Generic;
-using Unity.Cinemachine;
 using UnityEngine;
-using System.Linq;
+using Unity.Cinemachine;
 
-public class PlayerController : Singleton<PlayerController>, IDamageable
+public class PlayerControllerFirstPerson : PlayerControllerBase
 {
-    private const float WALKING_THRESHOLD = 1f;
-    private const float MAX_WALK_MAGNITUDE = 4f;
-    public Transform Camera { get; private set; }
-
-    private InputSystem_Actions _actions;
-    private Rigidbody _rb;
-
-    [Header("Health")]
-    [SerializeField] private int _maxHealth;
-    [SerializeField] private float _regenTimer;
-    [SerializeField] private List<CanvasGroup> _screenDamageEffects;
-    public int Health { get; private set; }
-    private Coroutine _regenCoroutine = null;
-    private Coroutine _fadeEffectCoroutine = null;
-
-    [Header("Movement")]
-    [SerializeField] private float _maxSpeed;
-    [SerializeField] private float _groundDrag;
-    [SerializeField] private float _rotationSpeed;
-    private List<float> _speedModifiers = new();
-    public float Speed { get { return _maxSpeed * _speedModifiers.Aggregate(1f, (acc, val) => acc * val); } }
-    private Vector2 _moveInput;
-
-    [Header("Ground Check")]
-    [SerializeField] private LayerMask _groundMask;
-    private bool _isGrounded;
-
     [Header("Attacking")]
     [SerializeField] private Attack _meleeAttack;
     [SerializeField] private DamageHitbox _meleeHitbox;
@@ -42,10 +13,6 @@ public class PlayerController : Singleton<PlayerController>, IDamageable
     [SerializeField] private Animator _handAnimator;
     private Attack _equippedAttack;
     private GameObject _projectilePrefab = null;
-    private bool _canAct = true;
-
-    [Header("Interacting")]
-    [SerializeField] private InteractHitbox _interactHitbox;
 
     [Header("Dodging")]
     [SerializeField] private float _dodgeCooldown;
@@ -54,9 +21,7 @@ public class PlayerController : Singleton<PlayerController>, IDamageable
     [SerializeField] private Transform _cameraTarget;
     [SerializeField] private AnimationCurve _dodgeCameraCurve;
     private CapsuleCollider _capsuleCollider;
-    private bool _isInvincible = false;
     private bool _isDodging = false;
-    private bool _isDead = false;
 
     [Header("Camera")]
     [SerializeField] private CinemachinePanTilt _cinemachinePanTilt;
@@ -66,48 +31,20 @@ public class PlayerController : Singleton<PlayerController>, IDamageable
     public override void Awake()
     {
         base.Awake();
-        _rb = GetComponent<Rigidbody>();
         _capsuleCollider = GetComponent<CapsuleCollider>();
-        Instance.Camera = UnityEngine.Camera.main.transform;
-        _actions = new InputSystem_Actions();
     }
 
     void Start()
     {
-        Health = _maxHealth;
         _meleeAttack.InitializeAttack(MeleeAttack, _meleeHitbox);
         //_rangedAttack.InitializeAttack(RangedAttack);
         _equippedAttack = _meleeAttack;
-
-        foreach (CanvasGroup group in _screenDamageEffects) group.alpha = 0f;
 
         _cinemachinePanTilt.PanAxis.Value = 0f;
         _cinemachinePanTilt.TiltAxis.Value = 0f;
     }
 
-    void OnEnable()
-    {
-        _actions.Player.Enable();
-        // Subscribe to input events
-        _actions.Player.Move.performed += ctx => _moveInput = ctx.ReadValue<Vector2>();
-        _actions.Player.Move.canceled += ctx => _moveInput = Vector2.zero;
-        _actions.Player.Interact.performed += ctx => Interact();
-        _actions.Player.Attack.performed += ctx => Attack();
-        _actions.Player.Dodge.performed += ctx => Dodge();
-    }
-
-    void OnDisable()
-    {
-        _actions.Player.Disable();
-        // Unsubscribe from input events
-        _actions.Player.Move.performed -= ctx => _moveInput = ctx.ReadValue<Vector2>();
-        _actions.Player.Move.canceled -= ctx => _moveInput = Vector2.zero;
-        _actions.Player.Interact.performed -= ctx => Interact();
-        _actions.Player.Attack.performed -= ctx => Attack();
-        _actions.Player.Dodge.performed -= ctx => Dodge();
-    }
-
-    void Update()
+    public override void Update()
     {
         if (GameManager.Instance.IsInState(GameManager.GameState.Walking) || GameManager.Instance.IsInState(GameManager.GameState.Combat))
         {
@@ -136,7 +73,7 @@ public class PlayerController : Singleton<PlayerController>, IDamageable
         }
     }
 
-    void FixedUpdate()
+    public override void FixedUpdate()
     {
         if (_isDodging) return;
 
@@ -156,23 +93,7 @@ public class PlayerController : Singleton<PlayerController>, IDamageable
         }
     }
 
-    private void Interact()
-    {
-        if (GameManager.Instance.IsInState(GameManager.GameState.Dialogue))
-        {
-            DialogueManager.Instance.TryAdvanceDialogue();
-        }
-        else if (GameManager.Instance.IsInState(GameManager.GameState.Walking))
-        {
-            _interactHitbox.TryInteract();
-        }
-        else if (GameManager.Instance.IsInState(GameManager.GameState.Combat))
-        {
-            if (_projectilePrefab == null) _interactHitbox.TryInteract();
-        }
-    }
-
-    private void Attack()
+    public override void Attack()
     {
         if (GameManager.Instance.IsInState(GameManager.GameState.Combat))
         {
@@ -204,20 +125,11 @@ public class PlayerController : Singleton<PlayerController>, IDamageable
         _canAct = true;
     }
 
-    public void PickupProjectile(GameObject prefab)
-    {
-        Debug.Log($"Picked up {prefab.name}");
-        _equippedAttack = _rangedAttack;
-        _projectilePrefab = prefab;
-    }
-
     private void RangedAttack()
     {
         Debug.Log("Throwing");
         _canAct = false;
-        // TODO: add throwing animation
-        // _handAnimator.SetTrigger("Throw");
-        _handAnimator.SetTrigger("Attack");
+        _handAnimator.SetTrigger("Throw");
 
         Quaternion angle = Quaternion.AngleAxis(-_throwAngle, Camera.right);
         GameObject projectile = Instantiate(_projectilePrefab, Camera.position + Camera.forward, angle * Camera.rotation);
@@ -234,7 +146,7 @@ public class PlayerController : Singleton<PlayerController>, IDamageable
         _canAct = true;
     }
 
-    private void Dodge()
+    public override void Dodge()
     {
         if (GameManager.Instance.IsInState(GameManager.GameState.Combat))
         {
@@ -323,72 +235,8 @@ public class PlayerController : Singleton<PlayerController>, IDamageable
         _canAct = true;
     }
 
-    public void TakeDamage(int damage)
-    {
-        if (_isInvincible) return;
-
-        Health -= damage;
-        if (Health <= 0)
-        {
-            _isDead = true;
-            StopAllCoroutines();
-            int index = _maxHealth - Health - 1;
-            if (index >= 0 && index < _screenDamageEffects.Count)
-            {
-                _screenDamageEffects[index].alpha = 1f;
-            }
-            else
-            {
-                Debug.LogWarning($"Invalid damage effect index: {index}");
-            }
-            SetCameraControlActive(false);
-            GameManager.Instance.OnDeath();
-            Debug.Log("Health = " + Health);
-        }
-        else
-        {
-            Debug.Log("Health = " + Health);
-            // Interrupt current regen timer if it exists, then start a new timer
-            if (_regenCoroutine != null) StopCoroutine(_regenCoroutine);
-
-            if (damage > 0)
-            {
-                // Took damage
-                if (_fadeEffectCoroutine != null) StopCoroutine(_fadeEffectCoroutine);
-                _screenDamageEffects[_maxHealth - Health - 1].alpha = 1f;
-            }
-            else if (damage < 0)
-            {
-                // Regenerated health
-                _fadeEffectCoroutine = StartCoroutine(FadeOutDamageEffect(_maxHealth - Health));
-            }
-
-            if (Health < _maxHealth) _regenCoroutine = StartCoroutine(RegenerateHealth());
-        }
-    }
-
-    private IEnumerator RegenerateHealth()
-    {
-        yield return new WaitForSeconds(_regenTimer);
-        if (Health < _maxHealth) TakeDamage(-1); // TODO: cursed?
-    }
-    
-    private IEnumerator FadeOutDamageEffect(int index)
-    {
-        float duration = 1f;
-        float timer = duration;
-        while (timer > 0f)
-        {
-            yield return null;
-            timer -= Time.deltaTime;
-            _screenDamageEffects[index].alpha = timer / duration;
-        }
-    }
-
-    public void AddSpeedModifier(float modifier) { _speedModifiers.Add(modifier); }
-    public void RemoveSpeedModifier(float modifier) { _speedModifiers.Remove(modifier); }
-    public void SetCameraControlActive(bool active) { _lookController.enabled = active; }
-    public void SpawnPlayer(Transform point)
+    public override void SetCameraControlActive(bool active) { _lookController.enabled = active; }
+    public override void SpawnPlayer(Transform point)
     {
         _rb.position = point.position;
         _cinemachinePanTilt.PanAxis.Value = point.eulerAngles.y;
