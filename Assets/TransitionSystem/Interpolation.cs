@@ -8,7 +8,7 @@ public static class Interpolation
 {
     public static IEnumerator Interpolate(Action onStart, Action<float> tween, Action onComplete, float duration)
     {
-        onStart();
+        onStart?.Invoke();
 
         float elapsed = 0f;
 
@@ -21,7 +21,7 @@ public static class Interpolation
         }
 
         tween(1f);
-        onComplete();
+        onComplete?.Invoke();
     }
 
     // --- Sine ---

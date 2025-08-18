@@ -13,79 +13,59 @@ public class FadeManager : Singleton<FadeManager>
     [SerializeField] private RectTransform _blinkTop;
     [SerializeField] private RectTransform _blinkBottom;
 
-    public Coroutine FadeOutAndDo(Action onComplete = null) => StartCoroutine(FadeCoroutine(true, onComplete));
-    public Coroutine FadeInAndDo(Action onComplete = null) => StartCoroutine(FadeCoroutine(false, onComplete));
-    public Coroutine BlinkAndDo(Action duringBlink = null) => StartCoroutine(BlinkCoroutine(duringBlink));
-    public Coroutine CloseEyesAndDo(Action onComplete = null) => StartCoroutine(SlowEyesCoroutine(true, onComplete));
-    public Coroutine OpenEyesAndDo(Action onComplete = null) => StartCoroutine(SlowEyesCoroutine(false, onComplete));
+    public Coroutine FadeOutAndDo(Action onComplete = null) => StartCoroutine(Fade(0f, 1f, _fadeDuration, onComplete));
+    public Coroutine FadeInAndDo(Action onComplete = null) => StartCoroutine(Fade(1f, 0f, _fadeDuration, onComplete));
+    public Coroutine BlinkAndDo(Action duringBlink = null) => StartCoroutine(BlinkSequence(_blinkDuration, duringBlink));
+    public Coroutine CloseEyesAndDo(Action onComplete = null) => StartCoroutine(Blink(true, _slowEyesDuration, onComplete));
+    public Coroutine OpenEyesAndDo(Action onComplete = null) => StartCoroutine(Blink(false, _slowEyesDuration, onComplete));
     public void SetEyesOpen() => SetEyesOpen(true);
     public void SetEyesClosed() => SetEyesOpen(false);
 
-    private IEnumerator FadeCoroutine(bool fadeOut, Action onComplete)
+    private IEnumerator Fade(float from, float to, float duration, Action onComplete = null)
     {
-        float from = fadeOut ? 0f : 1f;
-        float to = fadeOut ? 1f : 0f;
-        yield return Fade(from, to, _fadeDuration);
-        onComplete?.Invoke();
-    }
-
-    private IEnumerator BlinkCoroutine(Action duringBlink)
-    {
-        yield return Blink(true, _blinkDuration);
-        duringBlink?.Invoke();
-        yield return new WaitForSeconds(0.1f);
-        yield return Blink(false, _blinkDuration);
-    }
-
-    private IEnumerator SlowEyesCoroutine(bool closeEyes, Action onComplete)
-    {
-        yield return Blink(closeEyes, _slowEyesDuration);
-        onComplete?.Invoke();
-    }
-
-    private IEnumerator Animate(float from, float to, float duration, Action<float> onUpdate, Func<float, float> easing = null)
-    {
-        float timer = 0;
-        while (timer < duration)
-        {
-            timer += Time.deltaTime;
-            float t = timer / duration;
-            if (easing != null)
+        yield return Interpolation.Interpolate(
+            onStart: null,
+            tween: t =>
             {
-                t = easing(t);
-            }
-            float value = Mathf.Lerp(from, to, t);
-            onUpdate(value);
-            yield return new WaitForEndOfFrame();
-        }
-        onUpdate(to);
+                float alpha = Mathf.Lerp(from, to, t);
+                _fadeImage.color = new Color(0, 0, 0, alpha);
+            },
+            onComplete: onComplete,
+            duration: duration
+        );
     }
 
-    private IEnumerator Fade(float from, float to, float duration)
+    private IEnumerator BlinkSequence(float duration, Action duringBlink)
     {
-        yield return Animate(from, to, duration, alpha =>
+        // Close eyes
+        yield return Blink(true, duration, () =>
         {
-            _fadeImage.color = new(0, 0, 0, alpha);
+            duringBlink?.Invoke();
+            // Reopen eyes
+            StartCoroutine(Blink(false, duration));
         });
     }
 
-    private IEnumerator Blink(bool closing, float duration)
+    private IEnumerator Blink(bool closing, float duration, Action onComplete = null)
     {
-        if (closing) StartCoroutine(Fade(0f, 0.75f, duration));
-        else StartCoroutine(Fade(0.75f, 0f, duration));
+        // Fade while blinking
+        StartCoroutine(Fade(closing ? 0f : 0.75f, closing ? 0.75f : 0f, duration));
 
         float from = closing ? 0f : BLINK_START_Y;
         float to = closing ? BLINK_START_Y : 0f;
+        Func<float, float, float, float> easing = closing ? Interpolation.EaseInQuart : Interpolation.EaseOutQuart;
 
-        Func<float, float> easing;
-        if (closing) easing = t => t * t * t * t; // Quartic In
-        else easing = t => 1 - Mathf.Pow(1 - t, 4); // Quartic Out
-
-        yield return Animate(from, to, duration, y =>
-        {
-            _blinkTop.anchoredPosition = new(0, -y);
-            _blinkBottom.anchoredPosition = new(0, y);
-        }, easing);
+        yield return Interpolation.Interpolate(
+            onStart: null,
+            tween: t =>
+            {
+                float y = easing(from, to, t);
+                _blinkTop.anchoredPosition = new Vector2(0, -y);
+                _blinkBottom.anchoredPosition = new Vector2(0, y);
+            },
+            onComplete: onComplete,
+            duration: duration
+        );
     }
 
     private void SetEyesOpen(bool isOpen)

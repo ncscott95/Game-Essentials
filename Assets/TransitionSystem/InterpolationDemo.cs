@@ -48,6 +48,11 @@ public class InterpolationDemo : MonoBehaviour
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space) && !isAnimating) StartCoroutine(AnimateInterpolation());
+        else if (Input.GetKeyDown(KeyCode.Alpha1)) FadeManager.Instance.FadeInAndDo(() => Debug.Log("Faded in"));
+        else if (Input.GetKeyDown(KeyCode.Alpha2)) FadeManager.Instance.FadeOutAndDo(() => Debug.Log("Faded out"));
+        else if (Input.GetKeyDown(KeyCode.Alpha3)) FadeManager.Instance.BlinkAndDo(() => Debug.Log("Blinking"));
+        else if (Input.GetKeyDown(KeyCode.Alpha4)) FadeManager.Instance.CloseEyesAndDo(() => Debug.Log("Eyes closed"));
+        else if (Input.GetKeyDown(KeyCode.Alpha5)) FadeManager.Instance.OpenEyesAndDo(() => Debug.Log("Eyes opened"));
     }
 
     private IEnumerator AnimateInterpolation()
@@ -55,13 +60,13 @@ public class InterpolationDemo : MonoBehaviour
         var interpolationFunc = GetInterpolationFunction(interpolationType);
         yield return Interpolation.Interpolate
         (
-            onStart: () => { isAnimating = true; },
-            tween: (t) =>
+            onStart: () => isAnimating = true,
+            tween: t =>
             {
                 float interpolatedValue = interpolationFunc(startPosition, endPosition, t);
                 transform.position = new Vector3(interpolatedValue, transform.position.y, transform.position.z);
             },
-            onComplete: () => { isAnimating = false; },
+            onComplete: () => isAnimating = false,
             duration: duration
         );
     }
