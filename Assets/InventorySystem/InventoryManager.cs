@@ -4,7 +4,8 @@ using UnityEngine;
 public class InventoryManager : Singleton<InventoryManager>
 {
     public Container<Weapon> Hands = new(2);
-    public Container<Item> ItemContainer = new(200);
+    public Container<Item> Bag = new(20);
+    public Container<Ability> Spellbook = new(5);
 
     public void AddEquippable(Equippable equippable, int quantity = 1)
     {
@@ -14,7 +15,7 @@ public class InventoryManager : Singleton<InventoryManager>
         }
         else if (equippable is Item item)
         {
-            ItemContainer.AddItem(item, quantity);
+            Bag.AddItem(item, quantity);
         }
         else
         {
