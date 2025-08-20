@@ -1,7 +1,6 @@
 namespace InventorySystem
 {
     using System.Collections.Generic;
-    using Unity.VisualScripting;
     using UnityEngine;
 
     public class Container<T> where T : Equippable
@@ -23,7 +22,6 @@ namespace InventorySystem
             else
             {
                 // You should never need to add multiple non-stackable items at once
-                // Just add the item once multiple times
                 return AddSingleItem(item);
             }
         }
