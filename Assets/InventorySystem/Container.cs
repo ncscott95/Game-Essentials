@@ -1,6 +1,8 @@
 namespace InventorySystem
 {
     using System.Collections.Generic;
+    using Unity.VisualScripting;
+    using UnityEngine;
 
     public class Container<T> where T : Equippable
     {
@@ -12,53 +14,113 @@ namespace InventorySystem
             Capacity = capacity;
         }
 
-        public void AddItem(T item)
+        public bool AddItem(T item, int quantity = 1)
         {
-            if (!Equippables.Contains(item) && Equippables.Count < Capacity)
+            if (item is IStackable)
             {
-                if (item is IStackable stackableItem)
-                {
-                    var existingItem = Equippables.Find(i => i == item);
-                    if (existingItem != null && existingItem is IStackable existingStackable)
-                    {
-                        // Stack the item
-                        existingStackable.StackCount += stackableItem.StackCount;
-                    }
-                    else
-                    {
-                        // Add new item
-                        Equippables.Add(item);
-                    }
-                }
-                else
-                {
-                    Equippables.Add(item);
-                }
+                return AddStackableItem(item, quantity);
+            }
+            else
+            {
+                // You should never need to add multiple non-stackable items at once
+                // Just add the item once multiple times
+                return AddSingleItem(item);
             }
         }
 
-        public void RemoveItem(T item)
+        // Add a single, non-stackable item
+        private bool AddSingleItem(T item)
         {
-            if (Equippables.Contains(item))
+            if (Equippables.Count >= Capacity)
             {
-                if (item is IStackable stackableItem)
+                Debug.LogWarning("Container is full. Cannot add item: " + item.Name);
+                return false;
+            }
+
+            Equippables.Add(item);
+            return true;
+        }
+
+        // Add a stackable item with a specific quantity
+        private bool AddStackableItem(T item, int quantity)
+        {
+            IStackable stackableItem = item as IStackable;
+
+            // Find an existing stack of this item.
+            T existingItem = Equippables.Find(i => i.Name == item.Name);
+
+            if (existingItem != null && existingItem is IStackable existingStackable)
+            {
+                // Calculate how much room is left in the stack.
+                int stackRoom = existingStackable.MaxStackSize - existingStackable.StackCount;
+                int quantityToAdd = Mathf.Min(quantity, stackRoom);
+
+                if (quantityToAdd > 0)
                 {
-                    var existingItem = Equippables.Find(i => i == item);
-                    if (existingItem != null && existingItem is IStackable existingStackable)
-                    {
-                        existingStackable.StackCount -= stackableItem.StackCount;
-                        if (existingStackable.StackCount <= 0)
-                        {
-                            // Removed last item from stack
-                            Equippables.Remove((T)existingStackable);
-                        }
-                    }
+                    existingStackable.StackCount += quantityToAdd;
+                    return true;
                 }
                 else
                 {
-                    Equippables.Remove(item);
+                    Debug.Log("Stack is full. Cannot add more of this item.");
+                    return false;
                 }
             }
+            else
+            {
+                // Check for capacity before adding a new item.
+                if (Equippables.Count >= Capacity)
+                {
+                    Debug.LogWarning("Container is full. Cannot add item: " + item.Name);
+                    return false;
+                }
+
+                // Add a new stackable item if one doesn't exist yet.
+                stackableItem.StackCount = Mathf.Min(quantity, stackableItem.MaxStackSize);
+                Equippables.Add(item);
+                return true;
+            }
+        }
+
+        public bool RemoveItem(T item, int quantity = 1)
+        {
+            if (item is IStackable)
+            {
+                return RemoveStackableItem(item, quantity);
+            }
+            else
+            {
+                // You should never need to remove multiple non-stackable items at once
+                return RemoveSingleItem(item);
+            }
+        }
+
+        // Remove a single, non-stackable item
+        private bool RemoveSingleItem(T item)
+        {
+            return Equippables.Remove(item);
+        }
+
+        // Remove a stackable item with a specific quantity
+        private bool RemoveStackableItem(T item, int quantity)
+        {
+            IStackable existingStackable = item as IStackable;
+            if (Equippables.Contains(item))
+            {
+                if (existingStackable.StackCount > quantity)
+                {
+                    existingStackable.StackCount -= quantity;
+                    return true;
+                }
+                else if (existingStackable.StackCount <= quantity)
+                {
+                    // Remove the entire stack if the quantity is greater than or equal to the current count.
+                    return Equippables.Remove(item);
+                }
+            }
+
+            Debug.LogWarning("Item not found in container or not enough items in the stack.");
+            return false;
         }
 
         public void SwapItems(int indexA, int indexB)
