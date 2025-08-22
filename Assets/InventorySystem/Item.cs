@@ -3,7 +3,7 @@ namespace InventorySystem
     using UnityEngine;
 
     [CreateAssetMenu(fileName = "NewItem", menuName = "Inventory/Equippables/Item", order = 1)]
-    public class Item : Equippable, IStackable
+    public class Item : InventoryObject, IStackable
     {
         public int StackCount { get; set; }
         public int MaxStackSize { get; set; }

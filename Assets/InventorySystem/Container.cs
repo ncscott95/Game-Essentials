@@ -3,7 +3,7 @@ namespace InventorySystem
     using System.Collections.Generic;
     using UnityEngine;
 
-    public class Container<T> where T : Equippable
+    public class Container<T> where T : InventoryObject
     {
         public List<T> Equippables { get; private set; } = new List<T>();
         public readonly int Capacity;

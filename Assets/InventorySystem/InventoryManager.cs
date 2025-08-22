@@ -7,7 +7,7 @@ public class InventoryManager : Singleton<InventoryManager>
     public Container<Item> Bag = new(20);
     public Container<Ability> Spellbook = new(5);
 
-    public void AddEquippable<T>(T equippable, Container<T> container, int quantity = 1) where T : Equippable
+    public void AddEquippable<T>(T equippable, Container<T> container, int quantity = 1) where T : InventoryObject
     {
         container.AddItem(equippable, quantity);
     }
