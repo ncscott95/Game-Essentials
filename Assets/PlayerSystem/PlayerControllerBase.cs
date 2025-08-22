@@ -9,7 +9,7 @@ public abstract class PlayerControllerBase : Singleton<PlayerControllerBase>, ID
     protected const float MAX_WALK_MAGNITUDE = 4f;
     public Transform Camera { get; protected set; }
 
-    protected InputSystem_Actions _actions;
+    public InputSystem_Actions Actions { get; private set; }
     protected Rigidbody _rb;
     protected bool _canAct = true;
 
@@ -31,6 +31,9 @@ public abstract class PlayerControllerBase : Singleton<PlayerControllerBase>, ID
     public float Speed { get { return _maxSpeed * _speedModifiers.Aggregate(1f, (acc, val) => acc * val); } }
     protected Vector2 _moveInput;
 
+    [Header("Combat")]
+    public AbilityManager AbilityManager;
+
     [Header("Interacting")]
     [SerializeField] private InteractHitbox _interactHitbox;
 
@@ -39,7 +42,7 @@ public abstract class PlayerControllerBase : Singleton<PlayerControllerBase>, ID
         base.Awake();
         _rb = GetComponent<Rigidbody>();
         Instance.Camera = UnityEngine.Camera.main.transform;
-        _actions = new InputSystem_Actions();
+        Actions = new InputSystem_Actions();
     }
 
     void Start()
@@ -49,24 +52,24 @@ public abstract class PlayerControllerBase : Singleton<PlayerControllerBase>, ID
 
     void OnEnable()
     {
-        _actions.Player.Enable();
+        Actions.Player.Enable();
         // Subscribe to input events
-        _actions.Player.Move.performed += ctx => _moveInput = ctx.ReadValue<Vector2>();
-        _actions.Player.Move.canceled += ctx => _moveInput = Vector2.zero;
-        _actions.Player.Interact.performed += ctx => Interact();
-        _actions.Player.Attack.performed += ctx => Attack();
-        _actions.Player.Dodge.performed += ctx => Dodge();
+        Actions.Player.Move.performed += ctx => _moveInput = ctx.ReadValue<Vector2>();
+        Actions.Player.Move.canceled += ctx => _moveInput = Vector2.zero;
+        Actions.Player.Interact.performed += ctx => Interact();
+        Actions.Player.Attack.performed += ctx => Attack();
+        Actions.Player.Dodge.performed += ctx => Dodge();
     }
 
     void OnDisable()
     {
-        _actions.Player.Disable();
+        Actions.Player.Disable();
         // Unsubscribe from input events
-        _actions.Player.Move.performed -= ctx => _moveInput = ctx.ReadValue<Vector2>();
-        _actions.Player.Move.canceled -= ctx => _moveInput = Vector2.zero;
-        _actions.Player.Interact.performed -= ctx => Interact();
-        _actions.Player.Attack.performed -= ctx => Attack();
-        _actions.Player.Dodge.performed -= ctx => Dodge();
+        Actions.Player.Move.performed -= ctx => _moveInput = ctx.ReadValue<Vector2>();
+        Actions.Player.Move.canceled -= ctx => _moveInput = Vector2.zero;
+        Actions.Player.Interact.performed -= ctx => Interact();
+        Actions.Player.Attack.performed -= ctx => Attack();
+        Actions.Player.Dodge.performed -= ctx => Dodge();
     }
 
     public virtual void Update()

@@ -5,11 +5,11 @@ public class InventoryManager : Singleton<InventoryManager>
 {
     public Container<Weapon> Hands = new(2);
     public Container<Item> Bag = new(20);
-    public Container<Ability> Spellbook = new(5);
+    public AbilityContainer Spellbook = new(2);
 
-    public void AddEquippable<T>(T equippable, Container<T> container, int quantity = 1) where T : InventoryObject
+    public void AddToContainer<T>(T inventoryObject, Container<T> container, int quantity = 1) where T : InventoryObject
     {
-        container.AddItem(equippable, quantity);
+        container.AddItem(inventoryObject, quantity);
     }
 
     void Update()
@@ -24,17 +24,17 @@ public class InventoryManager : Singleton<InventoryManager>
         else if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             Weapon newWeapon = Weapon.NewWeapon("Sword", "A sharp blade.", null, 10);
-            AddEquippable(newWeapon, Hands);
+            AddToContainer(newWeapon, Hands);
         }
         else if (Input.GetKeyDown(KeyCode.Alpha2))
         {
             Item newItem = Item.NewItem("Health Potion", "Restores health.", null, 5);
-            AddEquippable(newItem, Bag);
+            AddToContainer(newItem, Bag);
         }
         else if (Input.GetKeyDown(KeyCode.Alpha3))
         {
-            Ability newAbility = Ability.NewAbility("Fireball", "Casts a fireball.", null, 20);
-            AddEquippable(newAbility, Spellbook);
+            Ability newAbility = Ability.NewAbility("Fireball", "Casts a fireball.", null);
+            AddToContainer(newAbility, Spellbook);
         }
     }
 }

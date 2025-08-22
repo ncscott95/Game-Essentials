@@ -9,7 +9,7 @@ namespace InventorySystem
         public string Description;
         public Sprite Icon;
 
-        public static InventoryObject NewEquippable(string name, string description, Sprite icon)
+        public static InventoryObject NewObject(string name, string description, Sprite icon)
         {
             InventoryObject newEquippable = CreateInstance<InventoryObject>();
 
@@ -18,6 +18,16 @@ namespace InventorySystem
             newEquippable.Icon = icon;
 
             return newEquippable;
+        }
+
+        public virtual void OnEquip()
+        {
+            Debug.Log("Equipped item: " + Name);
+        }
+
+        public virtual void OnUnequip()
+        {
+            Debug.Log("Unequipped item: " + Name);
         }
     }
 }

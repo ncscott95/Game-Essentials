@@ -5,7 +5,7 @@ namespace InventorySystem
 
     public class Container<T> where T : InventoryObject
     {
-        public List<T> Equippables { get; private set; } = new List<T>();
+        public List<T> Objects { get; private set; } = new List<T>();
         public readonly int Capacity;
 
         public Container(int capacity)
@@ -29,13 +29,14 @@ namespace InventorySystem
         // Add a single, non-stackable item
         private bool AddSingleItem(T item)
         {
-            if (Equippables.Count >= Capacity)
+            if (Objects.Count >= Capacity)
             {
                 Debug.LogWarning("Container is full. Cannot add item: " + item.Name);
                 return false;
             }
 
-            Equippables.Add(item);
+            Objects.Add(item);
+            OnAddItem(item, Objects.Count - 1);
             return true;
         }
 
@@ -45,7 +46,7 @@ namespace InventorySystem
             IStackable stackableItem = item as IStackable;
 
             // Find an existing stack of this item.
-            T existingItem = Equippables.Find(i => i.Name == item.Name);
+            T existingItem = Objects.Find(i => i.Name == item.Name);
 
             if (existingItem != null && existingItem is IStackable existingStackable)
             {
@@ -67,7 +68,7 @@ namespace InventorySystem
             else
             {
                 // Check for capacity before adding a new item.
-                if (Equippables.Count >= Capacity)
+                if (Objects.Count >= Capacity)
                 {
                     Debug.LogWarning("Container is full. Cannot add item: " + item.Name);
                     return false;
@@ -75,14 +76,20 @@ namespace InventorySystem
 
                 // Add a new stackable item if one doesn't exist yet.
                 stackableItem.StackCount = Mathf.Min(quantity, stackableItem.MaxStackSize);
-                Equippables.Add(item);
+                Objects.Add(item);
+                OnAddItem(item, Objects.Count - 1);
                 return true;
             }
         }
 
-        public bool RemoveItem(T item, int quantity = 1)
+        protected virtual void OnAddItem(T item, int index)
         {
-            if (item is IStackable)
+            Debug.Log("Item added to container: " + item.Name + " at index: " + index);
+        }
+
+        public bool RemoveItem(T item, int quantity = 1, bool removeAll = false)
+        {
+            if (item is IStackable && !removeAll)
             {
                 return RemoveStackableItem(item, quantity);
             }
@@ -96,14 +103,23 @@ namespace InventorySystem
         // Remove a single, non-stackable item
         private bool RemoveSingleItem(T item)
         {
-            return Equippables.Remove(item);
+            if (Objects.Contains(item))
+            {
+                int index = Objects.IndexOf(item);
+                Objects.Remove(item);
+                OnRemoveItem(item, index);
+                return true;
+            }
+
+            Debug.LogWarning("Item not found in container.");
+            return false;
         }
 
         // Remove a stackable item with a specific quantity
         private bool RemoveStackableItem(T item, int quantity)
         {
             IStackable existingStackable = item as IStackable;
-            if (Equippables.Contains(item))
+            if (Objects.Contains(item))
             {
                 if (existingStackable.StackCount > quantity)
                 {
@@ -113,7 +129,10 @@ namespace InventorySystem
                 else if (existingStackable.StackCount <= quantity)
                 {
                     // Remove the entire stack if the quantity is greater than or equal to the current count.
-                    return Equippables.Remove(item);
+                    int index = Objects.IndexOf(item);
+                    Objects.Remove(item);
+                    OnRemoveItem(item, index);
+                    return true;
                 }
             }
 
@@ -121,11 +140,23 @@ namespace InventorySystem
             return false;
         }
 
-        public void SwapItems(int indexA, int indexB)
+        protected virtual void OnRemoveItem(T item, int index)
         {
-            if (indexA >= 0 && indexA < Equippables.Count && indexB >= 0 && indexB < Equippables.Count)
+            Debug.Log("Item removed from container: " + item.Name + " at index: " + index);
+        }
+
+        public virtual void SwapItems(int indexA, int indexB)
+        {
+            if (indexA >= 0 && indexA < Objects.Count && indexB >= 0 && indexB < Objects.Count)
             {
-                (Equippables[indexB], Equippables[indexA]) = (Equippables[indexA], Equippables[indexB]);
+                T tempA = Objects[indexA];
+                T tempB = Objects[indexB];
+
+                RemoveItem(Objects[indexA]);
+                RemoveItem(Objects[indexB]);
+
+                AddItem(tempA, indexB);
+                AddItem(tempB, indexA);
             }
         }
     }
