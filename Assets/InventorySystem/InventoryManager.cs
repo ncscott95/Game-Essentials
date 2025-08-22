@@ -7,19 +7,34 @@ public class InventoryManager : Singleton<InventoryManager>
     public Container<Item> Bag = new(20);
     public Container<Ability> Spellbook = new(5);
 
-    public void AddEquippable(Equippable equippable, int quantity = 1)
+    public void AddEquippable<T>(T equippable, Container<T> container, int quantity = 1) where T : Equippable
     {
-        if (equippable is Weapon weapon)
+        container.AddItem(equippable, quantity);
+    }
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.I))
         {
-            Hands.AddItem(weapon, quantity);
+            Debug.Log("Inventory Contents:");
+            Debug.Log($"Hands: {Hands}");
+            Debug.Log($"Bag: {Bag}");
+            Debug.Log($"Spellbook: {Spellbook}");
         }
-        else if (equippable is Item item)
+        else if (Input.GetKeyDown(KeyCode.Alpha1))
         {
-            Bag.AddItem(item, quantity);
+            Weapon newWeapon = Weapon.NewWeapon("Sword", "A sharp blade.", null, 10);
+            AddEquippable(newWeapon, Hands);
         }
-        else
+        else if (Input.GetKeyDown(KeyCode.Alpha2))
         {
-            Debug.LogError("Invalid equippable type: " + equippable.Name);
+            Item newItem = Item.NewItem("Health Potion", "Restores health.", null, 5);
+            AddEquippable(newItem, Bag);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            Ability newAbility = Ability.NewAbility("Fireball", "Casts a fireball.", null, 20);
+            AddEquippable(newAbility, Spellbook);
         }
     }
 }

@@ -8,5 +8,16 @@ namespace InventorySystem
         public string Name;
         public string Description;
         public Sprite Icon;
+
+        public static Equippable NewEquippable(string name, string description, Sprite icon)
+        {
+            Equippable newEquippable = CreateInstance<Equippable>();
+
+            newEquippable.Name = name;
+            newEquippable.Description = description;
+            newEquippable.Icon = icon;
+
+            return newEquippable;
+        }
     }
 }
